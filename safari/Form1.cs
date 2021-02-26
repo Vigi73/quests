@@ -25,6 +25,12 @@ namespace safari
         private void button1_Click(object sender, EventArgs e)
         {
 
+            if (dataGridView1.Rows.Count > 1)
+            {
+                dataGridView1.Rows.Clear();
+
+            }
+
             if (Clipboard.ContainsText() == true)
             {
                 //Извлекаем (точнее копируем) его и сохраняем в переменную
@@ -131,14 +137,124 @@ namespace safari
             lbStatusText.Text = "0";
         }
 
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //
+            
         }
 
-        // Получаем где ловить
+        public void getWhereFish()
+        {
+            if (dataGridView3.Rows.Count > 1)
+            {
+                dataGridView3.Rows.Clear();
+
+            }
+
+            const string databaseName = @"DataBase.db";
+            SQLiteConnection connection3 =
+            new SQLiteConnection(string.Format("Data Source={0};", databaseName));
+            connection3.Open();
+
+            string fish = FirstUpper(comboBox2.Text).Trim();
+
+            SQLiteCommand command3 = new SQLiteCommand($"SELECT BasesFishCont.CountFish, Fishes.Name, Bases.Name, BasesFishCont.MinWeight, BasesFishCont.MaxWeight, Locations.Name, Bait.Name FROM  Bait, Locations, Bases, Fishes, BasesFishCont  WHERE BasesFishCont.IDCatchBait = Bait.ID AND BasesFishCont.IDCatchyLocation = Locations.ID AND BasesFishCont.IDBases = Bases.ID AND BasesFishCont.IDFish = Fishes.ID AND Fishes.Name='{fish}'", connection3);
+            SQLiteDataReader reader3 = command3.ExecuteReader();
+            int i = 0;
+
+            foreach (DbDataRecord record in reader3)
+            {
+                dataGridView3.Rows.Add(); // Создаем пустую запись в таблице
+                dataGridView3.Rows[i].Cells[0].Value = reader3[1];
+                dataGridView3.Rows[i].Cells[1].Value = reader3[0];
+                dataGridView3.Rows[i].Cells[2].Value = reader3[2];
+                dataGridView3.Rows[i].Cells[3].Value = reader3[5];
+                dataGridView3.Rows[i].Cells[4].Value = reader3[3];
+                dataGridView3.Rows[i].Cells[5].Value = reader3[4];
+                dataGridView3.Rows[i].Cells[6].Value = reader3[6];
+                i++;
+
+            }
+            connection3.Close();
+        }
+
+        public static string FirstUpper(string str)
+        {
+            return str.Substring(0, 1).ToUpper() + (str.Length > 1 ? str.Substring(1) : "");
 
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+            // Поиск локи вылова
+        {
+            getWhereFish();
+
+            string bases = FirstUpper(comboBox1.Text).Trim();
+            string fish = FirstUpper(comboBox2.Text).Trim();
+            //MessageBox.Show(bases, fish);
+
+            //getWhereFish();
+            /* string bases = "Озеро";
+             string fish = "Пескарь";*/
+
+            const string databaseName = @"DataBase.db";
+            SQLiteConnection connection4 =
+            new SQLiteConnection(string.Format("Data Source={0};", databaseName));
+            connection4.Open();
+
+           
+
+
+            try
+            {
+                if (dataGridView2.Rows.Count > 1)
+                {
+                    dataGridView2.Rows.Clear();
+                }
+               
+
+                
+
+                
+                SQLiteCommand command4 = new SQLiteCommand($"SELECT BasesFishCont.CountFish, Fishes.Name, Bases.Name, BasesFishCont.MinWeight, BasesFishCont.MaxWeight, Locations.Name, Bait.Name FROM  Bait, Locations, Bases, Fishes, BasesFishCont  WHERE BasesFishCont.IDCatchBait = Bait.ID AND BasesFishCont.IDCatchyLocation = Locations.ID AND BasesFishCont.IDBases = Bases.ID AND BasesFishCont.IDFish = Fishes.ID AND Fishes.Name='{fish}'AND Bases.Name = '{bases}'", connection4);
+                SQLiteDataReader reader4 = command4.ExecuteReader();
+
+                int i = 0;
+
+                foreach (DbDataRecord record in reader4)
+                {
+                    dataGridView2.Rows.Add(); // Создаем пустую запись в таблице
+                    dataGridView2.Rows[i].Cells[0].Value = reader4[1];
+                    dataGridView2.Rows[i].Cells[1].Value = reader4[5];
+                    dataGridView2.Rows[i].Cells[2].Value = reader4[6];
+
+                    i++;
+
+                }
+                connection4.Close();
+            }
+            catch
+            {
+                MessageBox.Show("Проверьте введенные данные");
+                
+            }
+            
+            connection4.Close();
+
+            }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (comboBox1.Text == string.Empty || comboBox2.Text == string.Empty)
+            {
+                button2.Enabled = false;
+            }
+            else
+            {
+                button2.Enabled = true;
+            }
+        }
     }
 }
 
